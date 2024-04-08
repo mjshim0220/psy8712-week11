@@ -16,13 +16,6 @@ gss_tbl<-gss %>%
   select(where(~ mean(is.na(.)) < 0.75))
 gss_tbl$`work hours`<-as.numeric(gss_tbl$`work hours`)
 
-#Visualization
-ggplot(gss_tbl, aes(x = `work hours`)) +
-  geom_histogram()+
-  labs(title = "Distribution of Work Hours",
-       x = "Work Hours",
-       y = "Frequency")
-
 #Analysis
 set.seed(0220)
 holdout_indices <- createDataPartition(gss_tbl$`work hours`,
