@@ -1,5 +1,5 @@
 #Script Settings and Resources
-setwd(dirname(rstudioapi::getActiveDocumentContext()$path))#error in here so I use the button on the Files tab
+setwd(dirname(rstudioapi::getActiveDocumentContext()$path))
 library(tidyverse)
 library(haven)
 library(caret)
