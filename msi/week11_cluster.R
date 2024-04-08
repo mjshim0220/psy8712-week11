@@ -103,7 +103,6 @@ rf_rmse<-cor(training_tbl$`work hours`, rf_pred)^2
 xgb_rmse<-cor(training_tbl$`work hours`, xgb_pred)^2
 
 
-#create a table 1
 # Publication
 make_it_pretty <- function (formatme) {
   formatme <- formatC(formatme, format="f", digits=2)
@@ -111,7 +110,7 @@ make_it_pretty <- function (formatme) {
   return(formatme)
 }
 
-table1_tbl <- tibble(
+table3_tbl <- tibble(
   algo = c("regression","elastic net","random forests","xgboost"),
   cv_rqs = c(
     make_it_pretty(cv_ols),
@@ -127,7 +126,10 @@ table1_tbl <- tibble(
   )
 )
 
-table1_tbl
+table3_tbl
+
+#create a csv file of table3
+write.csv(table3_tbl, "../out/table3.csv")
 
 #calculate the running time using function & tic and tock
 time <- function(model, training_tbl, na.pass) {
@@ -145,14 +147,13 @@ time <- function(model, training_tbl, na.pass) {
   return(time_taken$toc - time_taken$tic)  # Return the elapsed time
 }
 
-# Corrected model method for linear regression with stepwise variable selection
-
+#Calculated the time for each model
 model_lm_time <- time("lm", training_tbl, na.pass)
 model_net_time <- time("glmnet", training_tbl, na.pass)
 model_rf_time <- time("rf", training_tbl, na.pass)
 model_xgb_time <- time("xgbLinear", training_tbl, na.pass)
 
-##create a table2_tbl
+## Create a table4_tbl
 # Set up parallel processing
 cl <- makeCluster(detectCores() - 1)
 registerDoParallel(cl)
@@ -176,20 +177,20 @@ model_net_time_par <- time_par("glmnet", training_tbl, na.pass)
 model_rf_time_par <- time_par("rf", training_tbl, na.pass)
 model_xgb_time_par <- time_par("xgbLinear", training_tbl, na.pass)
 
-#Stopparallization
+#Stop parallization
 stopCluster(cl)
 registerDoSEQ()
 
-#create a table 2
-table2_tbl <- tibble(
+#Create a table 4
+table4_tbl <- tibble(
   algo = c("regression","elastic net","random forests","xgboost"),
-  original = c(
+  supercomputer = c(
     make_it_pretty(model_lm_time),
     make_it_pretty(model_net_time),
     make_it_pretty(model_rf_time),
     make_it_pretty(model_xgb_time)
   ),
-  parallelized = c(
+  supercomputer_1 = c(
     make_it_pretty(model_lm_time_par),
     make_it_pretty(model_net_time_par),
     make_it_pretty(model_rf_time_par),
@@ -197,13 +198,8 @@ table2_tbl <- tibble(
   )
 )
 
-table2_tbl
+table4_tbl
 
-#Q1. Which models benefited most from parallelization and why?
-## Based on the table random forest model presented the largest reduction in the running time when parallelized (220 --> 73.91 seconds).The random forest model's complex task works better under the paralleized condition.
+#Save the table as csv file
+write.csv(table4_tbl, "../out/table4.csv")
 
-#Q2. How big was the difference between the fastest and slowest parallelized model? Why?
-###73.91 (Random forest model) - 2.23(Elastic net model). The gap between the running time is because of the complexity of the algorithm. 
-
-#Q3. If your supervisor asked you to pick a model for use in a production model, which would you recommend and why? Consider both Table 1 and Table 2 when providing an answer.
-##In terms of performance, the XGBoost model performs the best, followed by the random forests model. However, in terms of efficiency of model execution, the random forests model is the top performer, with XGBoost coming in next. Given that performance takes precedence over execution efficiency, I would recommend the random forests model to my supervisor.

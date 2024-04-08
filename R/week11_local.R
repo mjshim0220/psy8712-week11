@@ -129,7 +129,7 @@ table1_tbl <- tibble(
 
 table1_tbl
 
-#calculate the running time using function & tic and tock
+#Calculate the running time using function & tic and tock
 time <- function(model, training_tbl, na.pass) {
   tic()  # Start the timer
   model_fit <- train(`work hours` ~ ., 
@@ -145,8 +145,7 @@ time <- function(model, training_tbl, na.pass) {
   return(time_taken$toc - time_taken$tic)  # Return the elapsed time
 }
 
-# Corrected model method for linear regression with stepwise variable selection
-
+#Calculated the time for each model
 model_lm_time <- time("lm", training_tbl, na.pass)
 model_net_time <- time("glmnet", training_tbl, na.pass)
 model_rf_time <- time("rf", training_tbl, na.pass)
@@ -171,16 +170,17 @@ time_par <- function(model, training_tbl, na.pass) {
   return(time_taken$toc - time_taken$tic)  # Return the elapsed time
 }
 
+#Calculated the time for each model
 model_lm_time_par <- time_par("lm", training_tbl, na.pass)
 model_net_time_par <- time_par("glmnet", training_tbl, na.pass)
 model_rf_time_par <- time_par("rf", training_tbl, na.pass)
 model_xgb_time_par <- time_par("xgbLinear", training_tbl, na.pass)
 
-#Stopparallization
+#Stopp arallization
 stopCluster(cl)
 registerDoSEQ()
 
-#create a table 2
+#Create a table 2
 table2_tbl <- tibble(
   algo = c("regression","elastic net","random forests","xgboost"),
   original = c(
