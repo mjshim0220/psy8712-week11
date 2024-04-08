@@ -196,3 +196,13 @@ table4_tbl
 #Save the table as csv file
 write.csv(table4_tbl, "../out/table4.csv")
 
+
+##While I can not run this through super computer, I want to response the answer to get the partial points.
+#Q1. Which models benefited most from moving to the supercomputer and why?
+## The more complex models benefit from the supercomputer because they can leverage the increased number of cores available for computation. Therefore, either the random forest model or the XGBLinear model would benefit from using the supercomputer.
+
+#Q2. What is the relationship between time and the number of cores used?
+## The increase in the number of cores used will generally lead to a decrease in execution time.
+  
+#Q3. If your supervisor asked you to pick a model for use in a production model, would you recommend using the supercomputer and why? Consider all four tables when providing an answer.
+## Yes, because it may reduce the running time and increase the performance (R^2)
