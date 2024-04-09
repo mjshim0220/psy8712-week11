@@ -26,6 +26,7 @@ training_tbl <- gss_tbl[-holdout_indices,]
 training_folds <- createFolds(training_tbl$`work hours`)
 
 #OLS regression model
+tic()
 ols_model <- train(`work hours` ~ ., 
                    data = training_tbl, 
                    method="lm",
@@ -37,7 +38,9 @@ ols_model <- train(`work hours` ~ .,
                                             indexOut = training_folds)
 )
 
+model_lm_time<-toc()$callback_msg
 # Elastic Net model
+tic()
 elastic_net_model <- train(`work hours` ~ ., 
                            data = training_tbl, 
                            method="glmnet",
@@ -48,8 +51,10 @@ elastic_net_model <- train(`work hours` ~ .,
                                                     verboseIter=T, 
                                                     indexOut = training_folds)
 )
+model_net_time<-toc()$callback_msg
 
 # Random Forest model
+tic()
 rf_model<-train(`work hours` ~ ., 
                 training_tbl,  
                 method="ranger",
@@ -61,8 +66,9 @@ rf_model<-train(`work hours` ~ .,
                                          verboseIter=T, 
                                          indexOut = training_folds))
 
-
+model_rf_time<-toc()$callback_msg
 #eXtreme Gradient Boosting model
+tic()
 xgb_model <- train(`work hours` ~ ., 
                    training_tbl,  
                    method="xgbLinear",
@@ -75,6 +81,7 @@ xgb_model <- train(`work hours` ~ .,
                                             indexOut = training_folds))
 
 
+model_xgb_time<-toc()$callback_msg
 
 cv_ols <- max(ols_model$results$Rsquared)
 cv_net<-max(elastic_net_model$results$Rsquared)
@@ -123,71 +130,85 @@ table3_tbl
 #create a csv file of table3
 write.csv(table3_tbl, "../out/table3.csv")
 
-#calculate the running time using function & tic and tock
-time <- function(model, training_tbl, na.pass) {
-  tic()  # Start the timer
-  model_fit <- train(`work hours` ~ ., 
-                     data = training_tbl, 
-                     method = model,
-                     trControl = trainControl(method="cv", 
-                                              number=10, 
-                                              verboseIter=T, 
-                                              indexOut = training_folds),
-                     preProcess = c("center","scale","zv","nzv","medianImpute"),
-                     na.action = na.pass)
-  time_taken <- toc(log = TRUE)  # End the timer and store the elapsed time
-  return(time_taken$toc - time_taken$tic)  # Return the elapsed time
-}
-
-#Calculated the time for each model
-model_lm_time <- time("lm", training_tbl, na.pass)
-model_net_time <- time("glmnet", training_tbl, na.pass)
-model_rf_time <- time("rf", training_tbl, na.pass)
-model_xgb_time <- time("xgbLinear", training_tbl, na.pass)
-
-## Create a table4_tbl
 # Set up parallel processing
 cl <- makeCluster(detectCores() - 1)
 registerDoParallel(cl)
-time_par <- function(model, training_tbl, na.pass) {
-  tic()  # Start the timer
-  model_fit <- train(`work hours` ~ ., 
-                     data = training_tbl, 
-                     method = model,
-                     trControl = trainControl(method="cv", 
-                                              number=10, 
-                                              verboseIter=T, 
-                                              indexOut = training_folds),
-                     preProcess = c("center","scale","zv","nzv","medianImpute"),
-                     na.action = na.pass)
-  time_taken <- toc(log = TRUE)  # End the timer and store the elapsed time
-  return(time_taken$toc - time_taken$tic)  # Return the elapsed time
-}
 
-model_lm_time_par <- time_par("lm", training_tbl, na.pass)
-model_net_time_par <- time_par("glmnet", training_tbl, na.pass)
-model_rf_time_par <- time_par("rf", training_tbl, na.pass)
-model_xgb_time_par <- time_par("xgbLinear", training_tbl, na.pass)
+#OLS regression model
+tic()
+ols_model <- train(`work hours` ~ ., 
+                   data = training_tbl, 
+                   method="lm",
+                   na.action = na.pass,
+                   preProcess = c("center","scale","zv","nzv","medianImpute"),
+                   trControl = trainControl(method="cv", 
+                                            number=10, 
+                                            verboseIter=T, 
+                                            indexOut = training_folds)
+)
+
+model_lm_time_par<-toc()$callback_msg
+# Elastic Net model
+tic()
+elastic_net_model <- train(`work hours` ~ ., 
+                           data = training_tbl, 
+                           method="glmnet",
+                           na.action = na.pass,
+                           preProcess = c("center","scale","zv","nzv","medianImpute"),
+                           trControl = trainControl(method="cv", 
+                                                    number=10, 
+                                                    verboseIter=T, 
+                                                    indexOut = training_folds)
+)
+model_net_time_par<-toc()$callback_msg
+
+# Random Forest model
+tic()
+rf_model<-train(`work hours` ~ ., 
+                training_tbl,  
+                method="ranger",
+                na.action = na.pass,
+                tuneLength = 1,
+                preProcess = c("center","scale","zv","nzv","medianImpute"),
+                trControl = trainControl(method="cv", 
+                                         number=10, 
+                                         verboseIter=T, 
+                                         indexOut = training_folds))
+
+model_rf_time_par<-toc()$callback_msg
+#eXtreme Gradient Boosting model
+tic()
+xgb_model <- train(`work hours` ~ ., 
+                   training_tbl,  
+                   method="xgbLinear",
+                   na.action = na.pass,
+                   tuneLength = 1,
+                   preProcess = c("center","scale","zv","nzv","medianImpute"),
+                   trControl = trainControl(method="cv", 
+                                            number=10, 
+                                            verboseIter=T, 
+                                            indexOut = training_folds))
+
+
+model_xgb_time_par<-toc()$callback_msg
+
+
+
 
 #Stop parallization
 stopCluster(cl)
 registerDoSEQ()
 
 #Create a table 4
-table4_tbl <- tibble(
+table4_tbl<-tibble(
   algo = c("regression","elastic net","random forests","xgboost"),
-  supercomputer = c(
-    make_it_pretty(model_lm_time),
-    make_it_pretty(model_net_time),
-    make_it_pretty(model_rf_time),
-    make_it_pretty(model_xgb_time)
-  ),
-  supercomputer_40 = c(
-    make_it_pretty(model_lm_time_par),
-    make_it_pretty(model_net_time_par),
-    make_it_pretty(model_rf_time_par),
-    make_it_pretty(model_xgb_time_par)
-  )
+  supercomputer=as.numeric(c(model_lm_time,model_net_time,model_rf_time,model_xgb_time)),
+  supercomputer_16=as.numeric(c(model_lm_time_par,model_net_time_par,model_rf_time_par,model_xgb_time_par)))
+
+table4_tbl <- tibble(
+  algo= c("regression","elastic net","random forests","xgboost"), 
+  supercomputer= c(model_lm_time,model_net_time,model_rf_time,model_xgb_time),
+  supercomputer_16=c(model_lm_time_par,model_net_time_par,model_rf_time_par,model_xgb_time_par)
 )
 
 table4_tbl
@@ -196,7 +217,6 @@ table4_tbl
 write.csv(table4_tbl, "../out/table4.csv")
 
 
-##While I can not run this through super computer, I want to response the answer to get the partial points.
 #Q1. Which models benefited most from moving to the supercomputer and why?
 ## The more complex models benefit from the supercomputer because they can leverage the increased number of cores available for computation. Therefore, either the random forest model or the XGBLinear model would benefit from using the supercomputer.
 
@@ -205,3 +225,4 @@ write.csv(table4_tbl, "../out/table4.csv")
 
 #Q3. If your supervisor asked you to pick a model for use in a production model, would you recommend using the supercomputer and why? Consider all four tables when providing an answer.
 ## Yes, because it may reduce the running time and increase the performance (R^2)
+
