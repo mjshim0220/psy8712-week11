@@ -131,8 +131,8 @@ table3_tbl
 write.csv(table3_tbl, "../out/table3.csv")
 
 # Set up parallel processing
-cl <- makeCluster(detectCores() - 1)
-registerDoParallel(cl)
+# cl <- makeCluster(detectCores() - 1)
+# registerDoParallel(cl)
 
 #OLS regression model
 tic()
@@ -195,9 +195,9 @@ model_xgb_time_par<-toc()$callback_msg
 
 
 
-#Stop parallization
-stopCluster(cl)
-registerDoSEQ()
+# #Stop parallization
+# stopCluster(cl)
+# registerDoSEQ()
 
 #Create a table 4
 table4_tbl<-tibble(
