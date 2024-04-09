@@ -182,7 +182,7 @@ table4_tbl <- tibble(
     make_it_pretty(model_rf_time),
     make_it_pretty(model_xgb_time)
   ),
-  supercomputer_1 = c(
+  supercomputer_40 = c(
     make_it_pretty(model_lm_time_par),
     make_it_pretty(model_net_time_par),
     make_it_pretty(model_rf_time_par),
@@ -202,6 +202,6 @@ write.csv(table4_tbl, "../out/table4.csv")
 
 #Q2. What is the relationship between time and the number of cores used?
 ## The increase in the number of cores used will generally lead to a decrease in execution time.
-  
+
 #Q3. If your supervisor asked you to pick a model for use in a production model, would you recommend using the supercomputer and why? Consider all four tables when providing an answer.
 ## Yes, because it may reduce the running time and increase the performance (R^2)
